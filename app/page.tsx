@@ -4,18 +4,21 @@ import React, { useState } from "react";
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
+  const [text, setText] = useState("");
+  const [pages, setPages] = useState<number | null>(null);
+  const [guaranteeCount, setGuaranteeCount] = useState<number | null>(null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
     if (!selected) return;
 
     if (selected.type !== "application/pdf") {
-      setError("Please upload a PDF file.");
+      setError("Please upload a PDF file only.");
       return;
     }
 
     if (selected.size > 5 * 1024 * 1024) {
-      setError("File must be under 5MB.");
+      setError("File size must be under 5MB.");
       return;
     }
 
@@ -42,8 +45,9 @@ export default function Page() {
         return;
       }
 
-      console.log("PDF Text:", data.text);
-      console.log("Pages:", data.pages);
+      setText(data.text || "");
+      setPages(data.pages ?? null);
+      setGuaranteeCount(data.guaranteeCount ?? null);
     } catch (err: any) {
       setError("Network error: " + err.message);
     }
@@ -63,6 +67,27 @@ export default function Page() {
       </button>
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
+
+      {pages !== null && (
+        <div className="mt-4">
+          <p className="font-semibold">Pages:</p>
+          <p>{pages}</p>
+        </div>
+      )}
+
+      {guaranteeCount !== null && (
+        <div className="mt-2">
+          <p className="font-semibold">"guarantee" count:</p>
+          <p>{guaranteeCount}</p>
+        </div>
+      )}
+
+      {text && (
+        <div className="mt-4 p-2 border border-gray-700 rounded max-h-96 overflow-auto whitespace-pre-wrap bg-black text-white">
+          <h2 className="font-semibold mb-2">Extracted text</h2>
+          <div>{text}</div>
+        </div>
+      )}
     </div>
   );
 }
